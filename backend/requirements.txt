@@ -2,7 +2,10 @@ fastapi
 sqlalchemy
 uvicorn
 pydantic
+pydantic[email]
 
 pwdlib[argon2]
 pyjwt
 pydantic-settings
+
+python-multipart
