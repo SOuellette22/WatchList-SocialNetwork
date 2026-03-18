@@ -21,5 +21,5 @@ class UserPrivate(UserPublic):
     email: EmailStr
 
 class UserLogin(UserBase):
-    # TODO Implement the UserLogin pydantic model
-    pass
+    username: str
+    password: str
