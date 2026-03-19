@@ -22,4 +22,4 @@ jobs:
           SECRET_KEY: "ci-test-secret-key-not-used-in-production"
         run: |
           source .venv/bin/activate
-          pytest
+          pytest -v
