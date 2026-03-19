@@ -5,9 +5,10 @@ from backend.app.routers import (
     users
 )
 
+# Sets the sqlalchemy database as the backends db
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="WatchTogether API")
+app = FastAPI(title="WatchTogether API") # Initializes the app
 
 app.include_router(users.router)
 
