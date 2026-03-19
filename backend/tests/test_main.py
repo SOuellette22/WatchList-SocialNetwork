@@ -1,7 +1,4 @@
-from backend.tests import client
-
-
-def test_read_root():
-    response = client.get("/")
-    assert response.status_code == 200
-    assert response.json() == {"message": "Hello World"}
+def test_root(client):
+    resp = client.get("/")
+    assert resp.status_code == 200
+    assert resp.json() == {"message": "WatchTogether API"}

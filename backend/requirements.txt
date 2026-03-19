@@ -1,11 +1,20 @@
+# Web framework
 fastapi
-sqlalchemy
 uvicorn
+
+# Database
+sqlalchemy
 pydantic
 pydantic[email]
 
+# User authentication
 pwdlib[argon2]
 pyjwt
 pydantic-settings
 
+# File uploads
 python-multipart
+
+# Testing
+pytest
+httpx
