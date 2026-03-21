@@ -1,11 +1,4 @@
-from fastapi.testclient import TestClient
-
-from backend.app.main import app
-
-client = TestClient(app)
-
-
-def test_read_root():
-    response = client.get("/")
-    assert response.status_code == 200
-    assert response.json() == {"Hello": "World"}
+def test_root(client):
+    resp = client.get("/")
+    assert resp.status_code == 200
+    assert resp.json() == {"message": "WatchTogether API"}
