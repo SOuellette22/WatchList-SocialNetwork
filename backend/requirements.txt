@@ -1,20 +1,20 @@
 # Web framework
-fastapi
-uvicorn
+fastapi == 0.135.1
+uvicorn == 0.42.0
 
 # Database
-sqlalchemy
-pydantic
-pydantic[email]
+sqlalchemy == 2.0.48
+pydantic == 2.12.5
+pydantic[email] == 2.12.5
 
 # User authentication
-pwdlib[argon2]
-pyjwt
-pydantic-settings
+pwdlib[argon2] == 0.3.0
+pyjwt == 2.12.1
+pydantic-settings == 2.13.1
 
 # File uploads
-python-multipart
+python-multipart == 0.0.22
 
 # Testing
-pytest
-httpx
+pytest == 9.0.2
+httpx == 0.28.1

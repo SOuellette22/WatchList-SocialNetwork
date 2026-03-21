@@ -6,7 +6,7 @@ from fastapi.testclient import TestClient
 from backend.app.database import Base, get_db
 from backend.app.main import app
 
-# Sets up a temparairy database in memory
+# Sets up a temparary database in memory
 SQLALCHEMY_TEST_DATABASE_URL = "sqlite:///:memory:"
 
 # Credentials for the shared test user

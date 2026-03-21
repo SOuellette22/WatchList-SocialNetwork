@@ -21,7 +21,7 @@ router = APIRouter(prefix="/api/users", tags=["users"])
 
 @router.post("/register", response_model=UserPrivate, status_code=status.HTTP_201_CREATED)
 def register(user_in: UserCreate, db :Session = Depends(get_db)):
-    """Registers a new user and returns the created user with there email and not password"""
+    """Registers a new user and returns the created user with their email and not password"""
     
     # Checks if the username already exists in the database
     if db.query(User).filter(User.username == user_in.username).first():

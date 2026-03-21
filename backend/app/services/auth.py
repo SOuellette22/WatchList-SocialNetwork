@@ -12,7 +12,7 @@ from backend.app.models.users import User
 
 pass_hash = PasswordHash.recommended()
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/users/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/users/token")
 
 def hash_password(password: str) -> str:
     """This will hash the password (string) that is given to it"""
@@ -52,7 +52,7 @@ def verify_access_token(token: str) -> str | None:
         payload = jwt.decode(
             token,
             settings.secret_key.get_secret_value(),
-            algorithms=settings.algorithm,
+            algorithms=[settings.algorithm],
             options={"require": ["exp", "sub"]},
         )
     except jwt.InvalidTokenError:

@@ -27,6 +27,6 @@ class UserPrivate(UserPublic):
     email: EmailStr
 
 # This is the information needed for the user to login
-class UserLogin(UserBase):
+class UserLogin(BaseModel):
     username: str
     password: str
