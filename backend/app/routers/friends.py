@@ -6,7 +6,7 @@ from sqlalchemy import or_
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql.expression import ReturnsRows
-from starlette.status import HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, HTTP_429_TOO_MANY_REQUESTS
+from starlette.status import HTTP_204_NO_CONTENT, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, HTTP_429_TOO_MANY_REQUESTS
 
 from backend.app.database import get_db
 from backend.app.models.friends import Friendship, FriendshipStatus
@@ -104,7 +104,7 @@ def get_incoming_requests(
 # Post API Endpoints
 # --------------------------------------------------------------
 
-@router.post(f"/{username}", response_model=UserPublic, status_code=status.HTTP_201_CREATED)
+@router.post("/{username}", response_model=UserPublic, status_code=status.HTTP_201_CREATED)
 def send_friend_request(
     username: str,
     current_user: User = Depends(get_current_user),
@@ -207,3 +207,80 @@ def accept_friend_request(
     row.status = FriendshipStatus.accepted
     db.commit()
     return requester
+
+@router.post("/{username}/decline",
+             status_code=HTTP_204_NO_CONTENT
+             )
+def decline_friend_request(
+    username: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Decline a pending friend request. The requester may retry after 30 minutes."""
+    
+    requester = db.query(User).filter(User.username == username).first()
+    
+    if not requester:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+        
+    row = (
+        db.query(Friendship)
+        .filter(
+            Friendship.requester_id == requester.id,
+            Friendship.addressee_id == current_user.id,
+            Friendship.status == FriendshipStatus.pending,
+        )
+        .first()
+    )
+    
+    if not row:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No pending friend request from this user",
+        )
+        
+    row.status = FriendshipStatus.declined
+    row.declined_at = datetime.now()
+    db.commit()
+    
+# --------------------------------------------------------------
+# Delete API Endpoints
+# --------------------------------------------------------------
+
+@router.delete("/{username}",
+               status_code=status.HTTP_204_NO_CONTENT,
+               )
+def remove_friend(
+    username: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Remove an accepted friend, or cancel an outgoing pending request."""
+    
+    target = db.query(User).filter(User.username == username).first()
+    
+    if not target:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+        
+    row = _get_friendship(db, current_user.id, target.id)
+    
+    if not row or row.status == FriendshipStatus.declined:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No friendship or pending request found",
+        )
+        
+    if row.status == FriendshipStatus.pending and row.requester_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail="Cannot cancel a request you did not send",
+        )
+        
+    db.delete(row)
+    db.commit()
