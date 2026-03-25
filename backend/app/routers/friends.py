@@ -6,7 +6,6 @@ from sqlalchemy import or_
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql.expression import ReturnsRows
-from starlette.status import HTTP_204_NO_CONTENT, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND, HTTP_429_TOO_MANY_REQUESTS
 
 from backend.app.database import get_db
 from backend.app.models.friends import Friendship, FriendshipStatus
@@ -122,7 +121,7 @@ def send_friend_request(
         
     if target.id == current_user.id:
         raise HTTPException(
-            status_code=HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="Cannot add yourself as a friend"
         )
         
@@ -156,7 +155,7 @@ def send_friend_request(
                 
                 if datetime.now(timezone.utc).replace(tzinfo=None) < cooldown_ends:
                     raise HTTPException(
-                        status_code=HTTP_429_TOO_MANY_REQUESTS,
+                        status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                         detail=f"You must wait {DECLINE_COOLDOWN_MINUTES} minutes before sending another request to this user",
                     )
                     
@@ -209,7 +208,7 @@ def accept_friend_request(
     return requester
 
 @router.post("/{username}/decline",
-             status_code=HTTP_204_NO_CONTENT
+             status_code=status.HTTP_204_NO_CONTENT
              )
 def decline_friend_request(
     username: str,
