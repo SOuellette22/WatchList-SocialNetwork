@@ -156,28 +156,34 @@ def send_friend_request(
         # Checks if the users friendship request is pending    
         if existing.status == FriendshipStatus.pending:
             
+            # Checks to make sure the target has not already sent the current user a friend request
             if existing.requester_id == target.id:
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
                     detail="This user has already sent you a friend request"
                 )
             
+            # Raise error if current user has already sent the target a friend request
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Friend request already sent"
             )
             
+        # Checks if the friendship status between the target and the current user is declined
         if existing.status == FriendshipStatus.declined:
             
+            # Checks if the current user is the one that sent the friend request and if the declined time field is set
             if existing.requester_id == current_user.id and existing.declined_at:
                 cooldown_ends = existing.declined_at + timedelta(minutes=DECLINE_COOLDOWN_MINUTES)
                 
+                # Checks if has been 30 minutes since the current user has sent the friend request to the target
                 if datetime.now(timezone.utc).replace(tzinfo=None) < cooldown_ends:
                     raise HTTPException(
                         status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                         detail=f"You must wait {DECLINE_COOLDOWN_MINUTES} minutes before sending another request to this user",
                     )
                     
+            # If it has been 30 minutes since last friend request allow for another to be sent
             existing.requester_id = current_user.id
             existing.addressee_id = target.id
             existing.status = FriendshipStatus.pending
@@ -185,6 +191,7 @@ def send_friend_request(
             db.commit()
             return target
     
+    # If there is not friendship between the current user and the target send a friend request
     db.add(Friendship(requester_id=current_user.id, addressee_id=target.id))
     db.commit()
     return target
@@ -198,14 +205,17 @@ def accept_friend_request(
 ):
     """Accept a pending friend request from another user."""
     
+    # Query the db for the username of the person sending the friend request
     requester = db.query(User).filter(User.username == username).first()
     
+    # Checks if that user exists if not return 404 error
     if not requester:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found",
         )
         
+    # Query the db for that friend requests row in the db
     row = (
         db.query(Friendship)
         .filter(
@@ -216,12 +226,14 @@ def accept_friend_request(
         .first()
     )
     
+    # Checks if the row exists if not return 404 error
     if not row:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="No pending friend request from this user",
         )
         
+    # If that friend request existed then accept it
     row.status = FriendshipStatus.accepted
     db.commit()
     return requester
@@ -236,14 +248,17 @@ def decline_friend_request(
 ):
     """Decline a pending friend request. The requester may retry after 30 minutes."""
     
+    # Query db for th username of the person sending the friend request
     requester = db.query(User).filter(User.username == username).first()
     
+    # Checks if that user exists if not return 404 error
     if not requester:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found",
         )
-        
+    
+    # Query the db for that friend requests row in the db        
     row = (
         db.query(Friendship)
         .filter(
@@ -254,12 +269,14 @@ def decline_friend_request(
         .first()
     )
     
+    # If that row does not exist return 404 error
     if not row:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="No pending friend request from this user",
         )
         
+    # If the row did exist decline the friend request
     row.status = FriendshipStatus.declined
     row.declined_at = datetime.now()
     db.commit()
@@ -278,27 +295,33 @@ def remove_friend(
 ):
     """Remove an accepted friend, or cancel an outgoing pending request."""
     
+    # Query the db if the username is in the db
     target = db.query(User).filter(User.username == username).first()
     
+    # Check if the user exists if not return 404 error
     if not target:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="User not found",
         )
         
+    # Get the accepted friendship if one exists
     row = _get_friendship(db, current_user.id, target.id)
     
+    # If that friendship does not exist or it is declined then return 404 error
     if not row or row.status == FriendshipStatus.declined:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="No friendship or pending request found",
         )
         
+    # If the friendship status is pending and the current user is not the one that sent the request return 403 error
     if row.status == FriendshipStatus.pending and row.requester_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, 
             detail="Cannot cancel a request you did not send",
         )
-        
+    
+    # If all checks pass delete friendship :(    
     db.delete(row)
     db.commit()
