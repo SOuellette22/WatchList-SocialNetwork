@@ -22,7 +22,11 @@ DECLINE_COOLDOWN_MINUTES = 30
 # Internal Methods
 # --------------------------------------------------------------
 
-def _get_friendship(db: Session, user_a_id: int, user_b_id: int) -> Friendship | None:
+def _get_friendship(
+    db: Session, 
+    user_a_id: int, 
+    user_b_id: int
+) -> Friendship | None:
     """Returns the friendship row between two users regardless of whi initiated it."""
     
     return (
@@ -36,7 +40,10 @@ def _get_friendship(db: Session, user_a_id: int, user_b_id: int) -> Friendship |
         .first()
     )
     
-def _get_friends_for_user(db: Session, user_id: int) -> list[User]:
+def _get_friends_for_user(
+    db: Session, 
+    user_id: int
+) -> list[User]:
     """Returns all accepted friends for a given user id."""
     
     # Query to find if the username is part of any accepted friendships in the database
