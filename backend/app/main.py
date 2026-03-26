@@ -5,7 +5,6 @@ from backend.app.routers import (
     users,
     friends
 )
-from backend.app.models import friends as _friends_model
 
 # Sets the sqlalchemy database as the backends db
 Base.metadata.create_all(bind=engine)

@@ -1,6 +1,5 @@
 from pydantic import BaseModel, ConfigDict
 
-from backend.app.models import friends
 from backend.app.schemas.users import UserPublic
 
 class FriendListOut(BaseModel):

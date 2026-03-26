@@ -1,11 +1,8 @@
-from datetime import datetime, timedelta, timezone
-from webbrowser import get
+from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.sql.expression import ReturnsRows
 
 from backend.app.database import get_db
 from backend.app.models.friends import Friendship, FriendshipStatus
@@ -27,7 +24,7 @@ def _get_friendship(
     user_a_id: int, 
     user_b_id: int
 ) -> Friendship | None:
-    """Returns the friendship row between two users regardless of whi initiated it."""
+    """Returns the friendship row between two users regardless of who initiated it."""
     
     return (
         db.query(Friendship)

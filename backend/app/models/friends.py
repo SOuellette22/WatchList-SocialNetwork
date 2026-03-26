@@ -18,7 +18,7 @@ class Friendship(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     requester_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     addressee_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False, index=True)
-    status: Mapped[str] = mapped_column(Enum(FriendshipStatus), nullable=False, default=FriendshipStatus.pending)
+    status: Mapped[FriendshipStatus] = mapped_column(Enum(FriendshipStatus), nullable=False, default=FriendshipStatus.pending)
     declined_at: Mapped[datetime|None] = mapped_column(DateTime, nullable=True, default=None)
     
     __table_args__ = (

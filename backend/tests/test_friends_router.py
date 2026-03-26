@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from backend.app.models.friends import Friendship, FriendshipStatus
+from backend.app.models.friends import Friendship
 from backend.tests.conftest import TEST_USER
 
 SECOND_USER = {
@@ -41,8 +41,10 @@ def second_auth_headers(client, second_user):
 @pytest.fixture()
 def accepted_friendship(client, registered_user, second_user, auth_headers, second_auth_headers):
     """Send and accept a friend request so both users are friends."""
-    client.post(f"/api/friends/{SECOND_USER['username']}", headers=auth_headers)
-    client.post(f"/api/friends/{TEST_USER['username']}/accept", headers=second_auth_headers)
+    resp_request = client.post(f"/api/friends/{SECOND_USER['username']}", headers=auth_headers)
+    assert resp_request.status_code == 201
+    resp_request = client.post(f"/api/friends/{TEST_USER['username']}/accept", headers=second_auth_headers)
+    assert resp_request.status_code == 200
 
 
 # ---------------------------------------------------------------------------
