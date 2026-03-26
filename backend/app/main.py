@@ -17,4 +17,4 @@ app.include_router(friends.router)
 
 @app.get("/")
 def root():
-    return {"message": "Hello World"}
+    return {"message": "WatchTogether API"}

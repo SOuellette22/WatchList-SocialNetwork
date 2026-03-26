@@ -97,7 +97,7 @@ class TestSendFriendRequest:
 
         # Manually backdate declined_at to simulate cooldown expiry
         row = db_session.query(Friendship).first()
-        row.declined_at = datetime.utcnow() - timedelta(minutes=31)
+        row.declined_at = datetime.now() - timedelta(minutes=31)
         db_session.commit()
 
         resp = client.post(f"/api/friends/{SECOND_USER['username']}", headers=auth_headers)

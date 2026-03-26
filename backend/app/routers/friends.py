@@ -205,7 +205,7 @@ def send_friend_request(
                 cooldown_ends = existing.declined_at + timedelta(minutes=DECLINE_COOLDOWN_MINUTES)
                 
                 # Checks if has been 30 minutes since the current user has sent the friend request to the target
-                if datetime.now().replace(tzinfo=None) < cooldown_ends:
+                if datetime.now() < cooldown_ends:
                     raise HTTPException(
                         status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                         detail=f"You must wait {DECLINE_COOLDOWN_MINUTES} minutes before sending another request to this user",
