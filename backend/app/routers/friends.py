@@ -118,6 +118,27 @@ def get_incoming_requests(
     # Returns a list of all the people that have requested to friend a user in the correct format
     return [FriendRequestOut(requester=u) for u in requesters]
 
+@router.get("/{username}", response_model=FriendListOut)
+def get_user_friends(
+    username: str,
+    db: Session = Depends(get_db),
+):
+    """Return any user's accepted friends list. No auth required."""
+    
+    # Query the db to see if the username is in the db
+    target = db.query(User).filter(User.username == username).first()
+    
+    # Checks username exists if not return 404 error
+    if not target:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, 
+            detail="User not found"
+        )
+
+    # Returns the friends of the user that is inputted in the correct format
+    friends = _get_friends_for_user(db, target.id)
+    return FriendListOut(friends=friends, total=len(friends))
+
 # --------------------------------------------------------------
 # Post API Endpoints
 # --------------------------------------------------------------
@@ -184,7 +205,7 @@ def send_friend_request(
                 cooldown_ends = existing.declined_at + timedelta(minutes=DECLINE_COOLDOWN_MINUTES)
                 
                 # Checks if has been 30 minutes since the current user has sent the friend request to the target
-                if datetime.now(timezone.utc).replace(tzinfo=None) < cooldown_ends:
+                if datetime.now().replace(tzinfo=None) < cooldown_ends:
                     raise HTTPException(
                         status_code=status.HTTP_429_TOO_MANY_REQUESTS,
                         detail=f"You must wait {DECLINE_COOLDOWN_MINUTES} minutes before sending another request to this user",
