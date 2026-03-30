@@ -3,7 +3,8 @@ from fastapi import FastAPI
 from backend.app.database import Base, engine
 from backend.app.routers import (
     users,
-    friends
+    friends,
+    media
 )
 
 # Sets the sqlalchemy database as the backends db
@@ -13,6 +14,7 @@ app = FastAPI(title="WatchTogether API") # Initializes the app
 
 app.include_router(users.router)
 app.include_router(friends.router)
+app.include_router(media.router)
 
 @app.get("/")
 def root():

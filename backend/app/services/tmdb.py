@@ -1,13 +1,13 @@
 from functools import cache
 import httpx
 from backend.app.config import settings
-from backend.app.services.cache import TTLCache
+from backend.app.services.cache import TLLCache
 
 _BASE_URL = "https://api.themoviedb.org/3"
 _IMAGE_BASE = "https://image.tmdb.org/t/p/w500"  # w500 = 500px wide poster
 
-_detail_cache = TTLCache(ttl_seconds=86400)  # 24 hours — movie/TV metadata is stable
-_search_cache = TTLCache(ttl_seconds=300)    # 5 minutes — search results change occasionally
+_detail_cache = TLLCache(tll_seconds=86400)  # 24 hours — movie/TV metadata is stable
+_search_cache = TLLCache(tll_seconds=300)    # 5 minutes — search results change occasionally
 
 def _headers() -> dict[str, str]:
     """Build the auth header's TMDB expects."""
