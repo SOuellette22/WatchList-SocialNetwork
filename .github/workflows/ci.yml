@@ -20,6 +20,7 @@ jobs:
       - name: Run tests
         env:
           SECRET_KEY: "ci-test-secret-key-not-used-in-production"
+          TMDB_API_TOKEN: "ci-test-secret-key-not-used-in-production"
         run: |
           source .venv/bin/activate
           pytest -v
