@@ -83,3 +83,12 @@ def auth_token(client, registered_user):
     )
     assert resp.status_code == 200, resp.text
     return resp.json()["access_token"]
+
+@pytest.fixture
+def auth_headers(client, registered_user):  # noqa: ARG001
+    response = client.post(
+        "/api/users/token",
+        data={"username": TEST_USER["username"], "password": TEST_USER["password"]},
+    )
+    token = response.json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}
