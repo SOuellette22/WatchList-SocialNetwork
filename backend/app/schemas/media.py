@@ -3,7 +3,7 @@ from pydantic import BaseModel
 class MediaSummary(BaseModel):
     """Compact representation used in search results."""
 
-    tmdb_is: int
+    tmdb_id: int
     media_type: str           # 'movie' or 'tv'
     title: str
     overview: str
