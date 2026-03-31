@@ -8,7 +8,7 @@ from backend.app.services.auth import get_current_user
 
 router = APIRouter(prefix="/api/media", tags=["media"])
 
-def _http_error_to_http_exception(exc: httpx.HTTPStatusError) -> HTTPException:
+def _http_error_to_http_exception(exc: httpx.HTTPStatusError):
     """Translate a TMDB error into a FastAPI HTTPException."""
     
     if exc.response.status_code  == 404:

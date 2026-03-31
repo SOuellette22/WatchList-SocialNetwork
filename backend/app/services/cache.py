@@ -2,11 +2,11 @@ import threading
 import time
 from typing import Any
 
-class TLLCache:
+class TTLCache:
     """Thread-safe in-process cache with per-entry time-to-live."""
 
-    def __init__(self, tll_seconds: int, max_size: int = 1000) -> None:
-        self._tll = tll_seconds
+    def __init__(self, ttl_seconds: int, max_size: int = 1000) -> None:
+        self._tll = ttl_seconds
         self._max_size = max_size
         self._store: dict[str, tuple[Any, float]] = {}
         self._lock = threading.Lock()
