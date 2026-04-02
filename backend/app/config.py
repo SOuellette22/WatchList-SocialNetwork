@@ -18,5 +18,6 @@ class Settings(BaseSettings):
     secret_key: SecretStr
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 30
+    tmdb_api_token: SecretStr | None
 
 settings = Settings() # This is loaded from the .env file
