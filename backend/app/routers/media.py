@@ -27,7 +27,7 @@ def _http_error_to_http_exception(exc: httpx.HTTPStatusError):
 
 @router.get("/search", response_model=SearchResponse)
 def search_media(
-    search_query: str = Query(min_length=1, description="Search query"),
+    search_query: str = Query(alias="q", min_length=1, description="Search query"),
     page: int = Query(default=1, ge=1),
     current_user: User = Depends(get_current_user),
 ):
