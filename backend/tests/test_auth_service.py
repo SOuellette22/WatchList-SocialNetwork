@@ -47,7 +47,7 @@ class TestJWTTokens:
     def test_token_signed_with_wrong_key_returns_none(self):
         bad_token = jwt.encode(
             {"sub": "42", "exp": 9_999_999_999},
-            "completely-wrong-secret",
+            "completely-wrong-secret-key-used-for-testing",
             algorithm="HS256",
         )
         assert verify_access_token(bad_token) is None
