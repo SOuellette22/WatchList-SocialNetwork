@@ -2,7 +2,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 class WatchlistEntryCreate(BaseModel):
     tmdb_id: int
-    media_type: str
+    media_type: str     # 'movie or 'tv'
     
     
 # TODO add the class that will take in the users emoji for the rating
@@ -12,8 +12,8 @@ class WatchlistEntryOut(BaseModel):
     
     id: int
     tmdb_id: int
-    media_type: str
-    list_type: str
+    media_type: str     # 'movie or 'tv'
+    list_type: str      # 'want-to-watch or watched
     
     # TODO add emoji support to this part of the schema
     

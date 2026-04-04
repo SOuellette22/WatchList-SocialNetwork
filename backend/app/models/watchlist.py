@@ -19,8 +19,8 @@ class WatchlistEntry(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     tmdb_id: Mapped[int] = mapped_column(Integer, nullable=False)
-    media_type: Mapped[MediaType] = mapped_column(Enum(MediaType), nullable=False)
-    list_type: Mapped[ListType] = mapped_column(Enum(ListType), nullable=False)
+    media_type: Mapped[MediaType] = mapped_column(Enum(MediaType), nullable=False)          # 'movie' or 'tv'
+    list_type: Mapped[ListType] = mapped_column(Enum(ListType), nullable=False)             # want-to-watch or watched
     
     # TODO add in the emoji rating stuff
     
