@@ -146,7 +146,7 @@ class TestGetMe:
     def test_token_signed_with_wrong_secret_returns_401(self, client):
         bad_token = jwt.encode(
             {"sub": "1", "exp": 9_999_999_999},
-            "completely-wrong-secret",
+            "completely-wrong-secret-key-used-for-testing",
             algorithm="HS256",
         )
         resp = client.get(
