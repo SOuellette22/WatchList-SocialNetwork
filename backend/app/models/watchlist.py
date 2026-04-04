@@ -1,6 +1,6 @@
 import enum
 
-from sqlalchemy import Enum, Float, ForeignKey, Integer, UniqueConstraint
+from sqlalchemy import Enum, ForeignKey, Integer, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from backend.app.database import Base
