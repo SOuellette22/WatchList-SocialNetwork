@@ -14,8 +14,7 @@ class WatchlistEntryOut(BaseModel):
     tmdb_id: int
     media_type: str     # 'movie or 'tv'
     list_type: str      # 'want-to-watch' or 'watched'
-    
-    # TODO add emoji support to this part of the schema
+    emoji: str | None = None
     
 class WatchlistOut(BaseModel):
     want_to_watch: list[WatchlistEntryOut]

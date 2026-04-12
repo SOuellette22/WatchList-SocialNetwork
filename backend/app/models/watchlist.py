@@ -1,6 +1,6 @@
 import enum
 
-from sqlalchemy import Enum, ForeignKey, Integer, UniqueConstraint
+from sqlalchemy import Enum, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from backend.app.database import Base
@@ -28,3 +28,15 @@ class WatchlistEntry(Base):
         UniqueConstraint("user_id", "tmdb_id", "media_type", name = "uq_user_media"),
     )
     
+class EmojiRating(Base):
+    __tablename__ = "emoji_ratings"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    user_id: Mapped[int] = mapped_column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    tmdb_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    media_type: Mapped[MediaType] = mapped_column(Enum(MediaType), nullable=False)
+    emoji: Mapped[str] = mapped_column(String(10), nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint("user_id", "tmdb_id", "media_type", name="uq_user_emoji"),
+    )
