@@ -1,5 +1,4 @@
 from collections import defaultdict
-from operator import ge
 from typing import Counter
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session

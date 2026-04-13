@@ -7,8 +7,6 @@ class WatchlistEntryCreate(BaseModel):
     media_type: str     # 'movie' or 'tv'
 
 
-# TODO add the class that will take in the users emoji for the rating
-
 class WatchlistEntryOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
