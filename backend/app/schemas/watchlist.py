@@ -5,34 +5,34 @@ SUGGESTED_EMOJIS: list[str] = ["🔥", "😂", "💩", "😢", "😍"]
 class WatchlistEntryCreate(BaseModel):
     tmdb_id: int
     media_type: str     # 'movie' or 'tv'
-    
-    
+
+
 # TODO add the class that will take in the users emoji for the rating
 
 class WatchlistEntryOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-    
+
     id: int
     tmdb_id: int
     media_type: str     # 'movie or 'tv'
     list_type: str      # 'want-to-watch' or 'watched'
     emoji: str | None = None
-    
-class WatchlistOut(BaseModel):
-    want_to_watch: list[WatchlistEntryOut]
-    watched: list[WatchlistEntryOut]
-    
-class FriendEmoji(BaseModel):  # NEW
+
+class FriendEmoji(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     username: str
     emoji: str
 
 
-class WatchlistEntryWithFriendEmojis(WatchlistEntryOut):  # NEW
+class WatchlistEntryWithFriendEmojis(WatchlistEntryOut):
     friend_emojis: list[FriendEmoji] = []
-    
-class EmojiRatingCreate(BaseModel):  # NEW
+
+class WatchlistOut(BaseModel):
+    want_to_watch: list[WatchlistEntryWithFriendEmojis]
+    watched: list[WatchlistEntryOut]
+
+class EmojiRatingCreate(BaseModel):
     tmdb_id: int
     media_type: str
     emoji: str
@@ -47,7 +47,7 @@ class EmojiRatingCreate(BaseModel):  # NEW
         return v.strip()
 
 
-class EmojiRatingOut(BaseModel):  # NEW
+class EmojiRatingOut(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
@@ -57,6 +57,6 @@ class EmojiRatingOut(BaseModel):  # NEW
     emoji: str
 
 
-class EmojiCount(BaseModel):  # NEW
+class EmojiCount(BaseModel):
     emoji: str
     count: int
