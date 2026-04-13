@@ -1,5 +1,7 @@
 from pydantic import BaseModel, ConfigDict, field_validator
 
+SUGGESTED_EMOJIS: list[str] = ["🔥", "😂", "💩", "😢", "😍"]
+
 class WatchlistEntryCreate(BaseModel):
     tmdb_id: int
     media_type: str     # 'movie' or 'tv'
