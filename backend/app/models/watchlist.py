@@ -22,8 +22,6 @@ class WatchlistEntry(Base):
     media_type: Mapped[MediaType] = mapped_column(Enum(MediaType), nullable=False)          # 'movie' or 'tv'
     list_type: Mapped[ListType] = mapped_column(Enum(ListType), nullable=False)             # want-to-watch or watched
     
-    # TODO add in the emoji rating stuff
-    
     __table_args__ = (
         UniqueConstraint("user_id", "tmdb_id", "media_type", name = "uq_user_media"),
     )

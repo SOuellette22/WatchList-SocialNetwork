@@ -67,6 +67,7 @@ def get_my_watchlist(
         .all()
     )
 
+    # Saves all the want to watch and watched movies/shows for the current user into there receptive lists.
     want_to_watch = [e for e in all_entries if e.list_type == ListType.want_to_watch]
     watched = [e for e in all_entries if e.list_type == ListType.watched]
 
@@ -74,8 +75,10 @@ def get_my_watchlist(
     friends = _get_friends_for_user(db, current_user.id)
     friend_ids = [f.id for f in friends]
 
+    # Makes a list of the want to watch list with only the tmdb_id and the media_type
     wtw_pairs = [(e.tmdb_id, e.media_type) for e in want_to_watch]
 
+    # Makes a list of all the emojis the current users friends have left on that movie/show
     friend_emoji_rows = (
         db.query(EmojiRating, User.username)
         .join(User, User.id == EmojiRating.user_id)
@@ -84,6 +87,7 @@ def get_my_watchlist(
         if friend_ids else []
     )
 
+    # this process makes sure that only friends username and emoji are added to the friend_emoji_map for later use
     friend_emoji_map: dict[tuple, list] = defaultdict(list)
     for rating, username in friend_emoji_rows:
         if (rating.tmdb_id, rating.media_type) in set(wtw_pairs):
@@ -91,6 +95,7 @@ def get_my_watchlist(
                 FriendEmoji(username=username, emoji=rating.emoji)
             )
 
+    # Puts the friends username and emoji data into a more useful format along with making ready be be returned to the user
     wtw_with_friends = [
         WatchlistEntryWithFriendEmojis(
             id=entry.id,
@@ -104,6 +109,8 @@ def get_my_watchlist(
     ]
 
     # --- Below handles user's own emoji on watched list ---
+    
+    # Gets the emojis the current users has on there watched list
     my_ratings = (
         db.query(EmojiRating)
         .filter(
@@ -114,6 +121,7 @@ def get_my_watchlist(
     )
     my_emoji_map = {(r.tmdb_id, r.media_type): r.emoji for r in my_ratings}
 
+    # Puts the emoji the current user has on their watched list into a useful format along with making it ready to return
     watched_with_emoji = [
         WatchlistEntryOut(
             id=entry.id,
@@ -125,6 +133,7 @@ def get_my_watchlist(
         for entry in watched
     ]
 
+    # Returns the wanted to watch list and watched list with emojis of friends and self included
     return WatchlistOut(want_to_watch=wtw_with_friends, watched=watched_with_emoji)
     
     
@@ -142,17 +151,20 @@ def get_emoji_ratings(
 ):
     """Return aggregated emoji counts for a specific movie or show. No auth required."""
     
+    # Makes sure that the media type inputted is valid
     if media_type not in (MediaType.movie, MediaType.tv):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="media_type must be 'movie' or 'tv'",
         )
 
+    # Gets the emoji ratings of a specific movie/show
     rows = db.query(EmojiRating).filter(
         EmojiRating.tmdb_id == tmdb_id,
         EmojiRating.media_type == media_type,
     ).all()
     
+    # Saves the emoji into a counter to allow for easy display according to spec
     counts = Counter(r.emoji for r in rows)
     return [EmojiCount(emoji=emoji, count=count) for emoji, count in counts.items()]
     
@@ -167,6 +179,7 @@ def get_user_watchlist(
     If the requester is authenticated, want-to-watch entries include their friends' emojis.
     Watched entries always include the target user's own emoji ratings."""
 
+    # Gets the searched user from the database and makes sure they exist
     target = db.query(User).filter(User.username == username).first()
     if not target:
         raise HTTPException(
@@ -174,24 +187,30 @@ def get_user_watchlist(
             detail="User not found",
         )
 
+    # Gets all the watchlist entries for the searched user
     all_entries = (
         db.query(WatchlistEntry)
         .filter(WatchlistEntry.user_id == target.id)
         .all()
     )
 
+    # Saves all the want to watch and watched movies/shows for the searched user into there receptive lists.
     want_to_watch = [e for e in all_entries if e.list_type == ListType.want_to_watch]
     watched = [e for e in all_entries if e.list_type == ListType.watched]
 
     # --- Friend emojis: only if the requester is logged in ---
+    
+    # Checks to make sure that the current user is friends with the searched user
     if current_user:
         friends = _get_friends_for_user(db, current_user.id)
         friend_ids = [f.id for f in friends]
     else:
         friend_ids = []
-
+        
+    # Makes a list of the want to watch list with only the tmdb_id and the media_type
     wtw_pairs = [(e.tmdb_id, e.media_type) for e in want_to_watch]
 
+    # Makes a list of all the emojis the current users friends have left on that movie/show
     friend_emoji_rows = (
         db.query(EmojiRating, User.username)
         .join(User, User.id == EmojiRating.user_id)
@@ -200,6 +219,7 @@ def get_user_watchlist(
         if friend_ids else []
     )
 
+    # this process makes sure that only friends username and emoji are added to the friend_emoji_map for later use
     friend_emoji_map: dict[tuple, list] = defaultdict(list)
     for rating, uname in friend_emoji_rows:
         if (rating.tmdb_id, rating.media_type) in set(wtw_pairs):
@@ -207,6 +227,7 @@ def get_user_watchlist(
                 FriendEmoji(username=uname, emoji=rating.emoji)
             )
 
+    # Puts the friends username and emoji data into a more useful format along with making ready be be returned to the user
     wtw_with_friends = [
         WatchlistEntryWithFriendEmojis(
             id=entry.id,
@@ -220,6 +241,8 @@ def get_user_watchlist(
     ]
 
     # --- Target user's own emoji on their watched entries ---
+    
+    # Gets the targets emojis that they have left on their watched list
     target_ratings = (
         db.query(EmojiRating)
         .filter(
@@ -230,6 +253,7 @@ def get_user_watchlist(
     )
     target_emoji_map = {(r.tmdb_id, r.media_type): r.emoji for r in target_ratings}
 
+    # Puts the watched emoji of the searched user into a usable format for easy display later
     watched_with_emoji = [
         WatchlistEntryOut(
             id=entry.id,
@@ -241,6 +265,7 @@ def get_user_watchlist(
         for entry in watched
     ]
 
+    # return the searched user want-to-watch list along with their watched list and the emojis needed
     return WatchlistOut(want_to_watch=wtw_with_friends, watched=watched_with_emoji) 
     
 # ------------------------------------------
@@ -255,12 +280,14 @@ def set_emoji_rating(
 ):
     """Submit or replace the authenticated user's emoji for a watched item. The item must be on the user's watch list - returns 403 otherwise."""
     
+    # Makes sure that the media type inputted is valid
     if body.media_type not in (MediaType.movie, MediaType.tv):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="media_type must be 'movie' or 'tv'",
         )
         
+    # Gets the movie/show that are in the current user searched in their watched list
     watched_entry = db.query(WatchlistEntry).filter(
         WatchlistEntry.user_id == current_user.id,
         WatchlistEntry.tmdb_id == body.tmdb_id,
@@ -268,24 +295,28 @@ def set_emoji_rating(
         WatchlistEntry.list_type == ListType.watched,
     ).first()
     
+    # If the watched list search does not have anything raise a 403 error
     if not watched_entry:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Item must be on your watch list to rate it.",
         )
         
+    # Get the emoji that user has put on that movie/show
     existing = db.query(EmojiRating).filter(
         EmojiRating.user_id == current_user.id,
         EmojiRating.tmdb_id == body.tmdb_id,
         EmojiRating.media_type == body.media_type,
     ).first()
     
+    # If that emoji data exists already replace the out emoji with the new one
     if existing:
         existing.emoji = body.emoji
         db.commit()
         db.refresh(existing)
         return existing
 
+    # If the emoji data does not exist add it to the database
     rating = EmojiRating(
         user_id=current_user.id,
         tmdb_id=body.tmdb_id,
@@ -430,6 +461,7 @@ def delete_entry(
     # Gets the entry from the db
     entry = _get_entry(entry_id, current_user.id, db)
     
+    # Remove the emoji data from the emoji table as well
     db.query(EmojiRating).filter(
         EmojiRating.user_id == current_user.id,
         EmojiRating.tmdb_id == entry.tmdb_id,
@@ -450,23 +482,27 @@ def delete_emoji_rating(
 ):
     """Delete the authenticated user's emoji for a specific movie or show."""
 
+    # Makes sure that the media type inputted is valid
     if media_type not in (MediaType.movie, MediaType.tv):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="media_type must be 'movie' or 'tv'",
         )
 
+    # Gets the current users emoji date left on the inputted movie/show
     rating = db.query(EmojiRating).filter(
         EmojiRating.user_id == current_user.id,
         EmojiRating.tmdb_id == tmdb_id,
         EmojiRating.media_type == media_type,
     ).first()
 
+    # If that data does not exist raise a 404 error
     if not rating:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="No emoji rating found for this item.",
         )
 
+    # If is does delete it from the database
     db.delete(rating)
     db.commit()

@@ -24,7 +24,7 @@ class FriendEmoji(BaseModel):
 
 
 class WatchlistEntryWithFriendEmojis(WatchlistEntryOut):
-    friend_emojis: list[FriendEmoji] = []
+    friend_emojis: list[FriendEmoji] = []   # List of all emojis friends left on movie/show
 
 class WatchlistOut(BaseModel):
     want_to_watch: list[WatchlistEntryWithFriendEmojis]
@@ -35,6 +35,7 @@ class EmojiRatingCreate(BaseModel):
     media_type: str
     emoji: str
 
+    # Checks to make sure that the emoji inputted is a valid emoji
     @field_validator("emoji")
     @classmethod
     def must_be_valid_emoji(cls, v: str) -> str:

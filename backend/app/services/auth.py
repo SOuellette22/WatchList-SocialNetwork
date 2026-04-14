@@ -95,9 +95,17 @@ def get_optional_current_user(
     db: Session = Depends(get_db),
 ) -> User | None:
     """Return the current user if a valid token is provided, otherwise None."""
+    
+    # If token does not exist return None
     if not token:
         return None
+    
+    # Since token exists verify it is a user
     user_id = verify_access_token(token)
+    
+    # If not user return None
     if user_id is None:
         return None
+    
+    # Return the user from the database
     return db.get(User, int(user_id))
