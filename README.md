@@ -21,7 +21,7 @@ WatchTogether is a watchlist app with a social twist. Track what you've watched 
 
 - **Frontend:** React Native (with React Native Web for browser support)
 - **Backend:** FastAPI (Python)
-- **Database:** TBD
+- **Database:** SQLite (via SQLAlchemy 2.0) — may move to PostgreSQL for production
 - **External API:** TMDB (The Movie Database) for show and movie metadata
 
 ---
