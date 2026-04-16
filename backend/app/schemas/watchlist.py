@@ -35,7 +35,7 @@ class EmojiRatingCreate(BaseModel):
     media_type: str
     emoji: str
 
-    # Checks to make sure that the emoji inputted is a valid emoji
+    # Checks to make sure that the emoji inputted is a valid input
     @field_validator("emoji")
     @classmethod
     def must_be_valid_emoji(cls, v: str) -> str:

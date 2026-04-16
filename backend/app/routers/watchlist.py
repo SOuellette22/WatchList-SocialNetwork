@@ -1,5 +1,4 @@
-from collections import defaultdict
-from typing import Counter
+from collections import defaultdict, Counter
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from starlette.status import HTTP_204_NO_CONTENT
@@ -19,9 +18,18 @@ from backend.app.schemas.watchlist import (
     WatchlistOut,
 )
 from backend.app.services.auth import get_current_user, get_optional_current_user
-from backend.app.routers.friends import _get_friends_for_user
 
 router = APIRouter(prefix="/api/watchlist", tags=["watchlist"])
+
+def _get_friends_for_user(db: Session, user_id: int):
+    """Compatibility wrapper for friend lookup used by watchlist routes.
+    This avoids a direct module-level import of a private helper from another
+    router while preserving the existing behavior until the shared logic can
+    be moved into a dedicated service module.
+    """
+    from backend.app.routers import friends as friends_router
+    
+    return friends_router._get_friends_for_user(db, user_id)
 
 def _get_entry(
     entry_id: int, 
@@ -77,20 +85,24 @@ def get_my_watchlist(
 
     # Makes a list of the want to watch list with only the tmdb_id and the media_type
     wtw_pairs = [(e.tmdb_id, e.media_type) for e in want_to_watch]
-
-    # Makes a list of all the emojis the current users friends have left on that movie/show
-    friend_emoji_rows = (
-        db.query(EmojiRating, User.username)
-        .join(User, User.id == EmojiRating.user_id)
-        .filter(EmojiRating.user_id.in_(friend_ids))
+    wtw_tmdb_ids = [tmdb_id for tmdb_id, _ in wtw_pairs]          
+                                                                                                                                                
+    friend_emoji_rows = (                                                                                                                       
+        db.query(EmojiRating, User.username)                                                                                                    
+        .join(User, User.id == EmojiRating.user_id)                                                                                             
+        .filter(                                                                                 
+            EmojiRating.user_id.in_(friend_ids),    
+            EmojiRating.tmdb_id.in_(wtw_tmdb_ids),
+        )                                                                                                                                       
         .all()
-        if friend_ids else []
+        if friend_ids and wtw_tmdb_ids else []                                                                                                  
     )
 
     # this process makes sure that only friends username and emoji are added to the friend_emoji_map for later use
-    friend_emoji_map: dict[tuple, list] = defaultdict(list)
+    friend_emoji_map: dict[tuple, list] = defaultdict[tuple, list](list)
+    wtw_pairs_set = set[tuple[int , MediaType]](wtw_pairs)
     for rating, username in friend_emoji_rows:
-        if (rating.tmdb_id, rating.media_type) in set(wtw_pairs):
+        if (rating.tmdb_id, rating.media_type) in wtw_pairs_set:
             friend_emoji_map[(rating.tmdb_id, rating.media_type)].append(
                 FriendEmoji(username=username, emoji=rating.emoji)
             )
@@ -209,20 +221,24 @@ def get_user_watchlist(
         
     # Makes a list of the want to watch list with only the tmdb_id and the media_type
     wtw_pairs = [(e.tmdb_id, e.media_type) for e in want_to_watch]
-
-    # Makes a list of all the emojis the current users friends have left on that movie/show
-    friend_emoji_rows = (
-        db.query(EmojiRating, User.username)
-        .join(User, User.id == EmojiRating.user_id)
-        .filter(EmojiRating.user_id.in_(friend_ids))
+    wtw_tmdb_ids = [tmdb_id for tmdb_id, _ in wtw_pairs]          
+                                                                                                                                              
+    friend_emoji_rows = (                                                                                                                       
+        db.query(EmojiRating, User.username)                                                                                                    
+        .join(User, User.id == EmojiRating.user_id)                                                                                             
+        .filter(                                                                                 
+            EmojiRating.user_id.in_(friend_ids),    
+            EmojiRating.tmdb_id.in_(wtw_tmdb_ids),
+        )                                                                                                                                       
         .all()
-        if friend_ids else []
+        if friend_ids and wtw_tmdb_ids else []                                                                                                  
     )
 
     # this process makes sure that only friends username and emoji are added to the friend_emoji_map for later use
-    friend_emoji_map: dict[tuple, list] = defaultdict(list)
+    friend_emoji_map: dict[tuple, list] = defaultdict[tuple, list](list)
+    wtw_pairs_set = set[tuple[int, MediaType]](wtw_pairs)
     for rating, uname in friend_emoji_rows:
-        if (rating.tmdb_id, rating.media_type) in set(wtw_pairs):
+        if (rating.tmdb_id, rating.media_type) in wtw_pairs_set:
             friend_emoji_map[(rating.tmdb_id, rating.media_type)].append(
                 FriendEmoji(username=uname, emoji=rating.emoji)
             )
